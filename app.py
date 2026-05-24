@@ -51,7 +51,7 @@ if uploaded_file is not None:
     tfile.write(uploaded_file.read())
     tfile.close()
     
-    video_duration = 3.0  # القيمة الافتراضية للصور
+    video_duration = 2.9  # القيمة الافتراضية الآمنة
     
     # عرض الملف وجلب المدة إذا كان فيديو
     if file_type == "video":
@@ -73,14 +73,16 @@ if uploaded_file is not None:
     
     # إعدادات الوقت تظهر فقط في حال كان الملف المرفوع فيديو
     if file_type == "video":
-        st.write("⏳ تحديد وقت الفيديو (الحد الأقصى 3 ثوانٍ):")
+        st.write("⏳ تحديد وقت الفيديو (الحد الأقصى الأمني 2.9 ثانية):")
         start_time = st.number_input("وقت البدء (بالثواني):", min_value=0.0, max_value=max(0.0, video_duration-0.1), value=0.0, step=0.1)
-        end_time = st.number_input("وقت الانتهاء (بالثواني):", min_value=start_time+0.1, max_value=video_duration, value=min(start_time+3.0, video_duration), step=0.1)
+        # تم تعديل القيمة التلقائية لتكون بحد أقصى 2.9 ثانية كإجراء أمان لتجنب رفض تليجرام
+        end_time = st.number_input("وقت الانتهاء (بالثواني):", min_value=start_time+0.1, max_value=video_duration, value=min(start_time+2.9, video_duration), step=0.1)
         selected_duration = end_time - start_time
         st.info(f"⏱️ طول الفيديو المحدد الحالي: {selected_duration:.2f} ثانية")
         
-        if selected_duration > 3.0:
-            st.error("⚠️ تحذير: شروط تليجرام تمنع أن يتخطى طول الفيديو 3 ثوانٍ!")
+        # التنبيه والمنع إذا تخطى 2.9 ثانية لضمان قبول البوت
+        if selected_duration > 2.9:
+            st.error("⚠️ تحذير: لتجنب رفض تليجرام، يرجى جعل طول الفيديو أقل من 3 ثوانٍ (يفضل 2.9 ثانية أو أقل)!")
     else:
         # إذا كانت صورة، نجعل المدة الافتراضية ثانية واحدة (وهي كافية وممتازة للملصقات الثابتة بصيغة الفيديو)
         start_time = 0
@@ -97,8 +99,9 @@ if uploaded_file is not None:
         res_label = "100x100"
 
     if st.button("🚀 ابدأ المعالجة والتحويل"):
-        if file_type == "video" and selected_duration > 3.0:
-            st.error("يرجى تعديل الوقت ليصبح 3 ثوانٍ أو أقل أولاً.")
+        # التحقق الصارم من أن المدة لا تتجاوز 2.9 ثانية
+        if file_type == "video" and selected_duration > 2.9:
+            st.error("يرجى تعديل الوقت ليصبح 2.9 ثانية أو أقل لتفادي مشاكل الفحص في تليجرام.")
         else:
             with st.spinner("جاري معالجة الملف وضغطه بكوديك VP9..."):
                 output_filename = "telegram_target.webm"
